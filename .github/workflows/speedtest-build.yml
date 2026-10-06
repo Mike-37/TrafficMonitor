@@ -7,7 +7,7 @@ on:
 
 jobs:
   x64_build:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
     - uses: actions/checkout@v4
@@ -15,15 +15,25 @@ jobs:
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v2
 
-    - name: Install MFC (ATLMFC) component
+    - name: Ensure MFC (ATLMFC) component
       shell: pwsh
       run: |
         $vswhere = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
         $vsPath = & $vswhere -latest -products * -property installationPath
         Write-Host "VS install path: $vsPath"
-        $setup = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/setup.exe"
-        & $setup modify --installPath "$vsPath" --add Microsoft.VisualStudio.Component.VC.ATLMFC --quiet --norestart --wait
-        if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 3010) { exit $LASTEXITCODE }
+        $mfcHeader = Get-ChildItem -Path "$vsPath/VC/Tools/MSVC" -Recurse -Filter afxwin.h -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($mfcHeader) {
+          Write-Host "MFC already installed: $($mfcHeader.FullName)"
+        } else {
+          Write-Host "MFC not found, installing Microsoft.VisualStudio.Component.VC.ATLMFC ..."
+          $setup = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/setup.exe"
+          $proc = Start-Process -FilePath $setup -ArgumentList @('modify','--installPath',"`"$vsPath`"",'--add','Microsoft.VisualStudio.Component.VC.ATLMFC','--quiet','--norestart') -Wait -PassThru
+          Write-Host "Installer exit code: $($proc.ExitCode)"
+          if ($proc.ExitCode -ne 0 -and $proc.ExitCode -ne 3010) { exit $proc.ExitCode }
+          $mfcHeader = Get-ChildItem -Path "$vsPath/VC/Tools/MSVC" -Recurse -Filter afxwin.h -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $mfcHeader) { Write-Host "ERROR: afxwin.h still missing after install"; exit 1 }
+          Write-Host "MFC installed: $($mfcHeader.FullName)"
+        }
 
     - name: Run msbuild (Release x64)
       run: msbuild TrafficMonitor.sln -p:configuration=Release -p:platform=x64 -p:platformToolset=v143 -m -v:m

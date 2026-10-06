@@ -18,10 +18,10 @@ jobs:
     - name: Install MFC (ATLMFC) component
       shell: pwsh
       run: |
-        $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installerswhere.exe"
+        $vswhere = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe"
         $vsPath = & $vswhere -latest -products * -property installationPath
         Write-Host "VS install path: $vsPath"
-        $setup = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
+        $setup = "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/setup.exe"
         & $setup modify --installPath "$vsPath" --add Microsoft.VisualStudio.Component.VC.ATLMFC --quiet --norestart --wait
         if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 3010) { exit $LASTEXITCODE }
 

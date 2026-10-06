@@ -21,17 +21,17 @@ namespace
     CString GetJsonFilePath()
     {
         //优先使用固定路径（speed-test 任务的写入位置）
-        CString path{ _T("C:\Users\mikea\tools\speedtest-latest.json") };
+        CString path{ _T("C:\\Users\\mikea\\tools\\speedtest-latest.json") };
         if (GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES)
             return path;
         //回退：exe 同目录下的 speedtest-latest.json
         wchar_t exe_path[MAX_PATH]{};
         GetModuleFileNameW(NULL, exe_path, MAX_PATH);
         CString dir{ exe_path };
-        int pos = dir.ReverseFind(L'\');
+        int pos = dir.ReverseFind(L'\\');
         if (pos > 0)
             dir = dir.Left(pos);
-        return dir + L"\speedtest-latest.json";
+        return dir + L"\\speedtest-latest.json";
     }
 
     bool GetFileMtime(const CString& path, FILETIME& ft)

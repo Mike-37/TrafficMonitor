@@ -2,6 +2,13 @@
 #include "DisplayItem.h"
 #include "Common.h"
 #include "TrafficMonitor.h"
+#include "SpeedTestDisplay.h"
+
+bool IsSpeedtestDisplayItem(DisplayItem item)
+{
+    //任务栏上以下项目显示 speed-test 数据（替换实时上传/下载等网速项）
+    return item == TDI_UP || item == TDI_DOWN || item == TDI_TOTAL_SPEED || item == TDI_TODAY_TRAFFIC;
+}
 
 CommonDisplayItem::CommonDisplayItem(DisplayItem item)
 {
@@ -190,6 +197,20 @@ CString CommonDisplayItem::GetItemValueText(bool is_main_window) const
     }
     else
     {
+        //任务栏窗口：speed-test 数据替换实时网速项（悬浮窗/主窗口不受影响）
+        //TDI_UP -> 结果 "↓19.4 ↑7.5Mb"，TDI_DOWN -> ping，TDI_TOTAL_SPEED -> jitter，TDI_TODAY_TRAFFIC -> last-checked
+        if (!is_main_window && IsSpeedtestDisplayItem(item_type))
+        {
+            switch (item_type)
+            {
+            case TDI_UP: return CSpeedTestDisplay::GetResultText();
+            case TDI_DOWN: return CSpeedTestDisplay::GetPingText();
+            case TDI_TOTAL_SPEED: return CSpeedTestDisplay::GetJitterText();
+            case TDI_TODAY_TRAFFIC: return CSpeedTestDisplay::GetLastCheckedText();
+            default: break;
+            }
+        }
+
         const PublicSettingData* cfg_data{};
         if (is_main_window)
             cfg_data = &theApp.m_main_wnd_data;
@@ -320,6 +341,24 @@ CString CommonDisplayItem::GetItemValueSampleText(bool is_main_window) const
     //任务栏窗口（用于计算任务栏窗口宽度）
     else
     {
+        //speed-test 项：预留实际显示值的宽度（值文本自包含标签）
+        if (IsSpeedtestDisplayItem(item_type))
+        {
+            switch (item_type)
+            {
+            case TDI_UP:
+                return _T("↓888.8 ↑888.8Mb");
+            case TDI_DOWN:
+                return _T("8888ms");
+            case TDI_TOTAL_SPEED:
+                return _T("±8888ms");
+            case TDI_TODAY_TRAFFIC:
+                return _T("@88:88");
+            default:
+                break;
+            }
+        }
+
         CString sample_str;
         switch (item_type)
         {

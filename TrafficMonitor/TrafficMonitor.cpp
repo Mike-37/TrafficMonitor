@@ -171,7 +171,12 @@ void CTrafficMonitorApp::LoadConfig()
     ini.LoadTaskbarWndColors(_T("task_bar"), _T("task_bar_text_color"), m_taskbar_data.text_colors, m_taskbar_data.dft_text_colors);
     m_taskbar_data.specify_each_item_color = ini.GetBool(L"task_bar", L"specify_each_item_color", false);
     //m_cfg_data.m_tbar_show_cpu_memory = ini.GetBool(_T("task_bar"), _T("task_bar_show_cpu_memory"), false);
-    m_taskbar_data.display_item.FromInt(ini.GetInt(L"task_bar", L"tbar_display_item", DisplayItemSet{ TDI_UP, TDI_DOWN }.ToInt()));
+    m_taskbar_data.display_item.FromInt(ini.GetInt(L"task_bar", L"tbar_display_item", DisplayItemSet{ TDI_UP, TDI_DOWN, TDI_TOTAL_SPEED, TDI_TODAY_TRAFFIC }.ToInt()));
+    // speed-test 端口：任务栏始终显示 speed-test 四项（TDI_UP=结果 TDI_DOWN=ping TDI_TOTAL_SPEED=jitter TDI_TODAY_TRAFFIC=last-checked）
+    m_taskbar_data.display_item.Add(TDI_UP);
+    m_taskbar_data.display_item.Add(TDI_DOWN);
+    m_taskbar_data.display_item.Add(TDI_TOTAL_SPEED);
+    m_taskbar_data.display_item.Add(TDI_TODAY_TRAFFIC);
     m_taskbar_data.show_taskbar_wnd_in_secondary_display = ini.GetBool(L"task_bar", L"show_taskbar_wnd_in_secondary_display", false);
     m_taskbar_data.secondary_display_index = ini.GetInt(L"task_bar", L"secondary_display_index", 0);
 

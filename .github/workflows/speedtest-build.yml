@@ -1,0 +1,29 @@
+name: Speedtest Port Build
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+jobs:
+  x64_build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Run msbuild (Release x64)
+      run: msbuild TrafficMonitor.sln -p:configuration=Release -p:platform=x64 -p:platformToolset=v143 -m -v:m
+
+    - name: Upload TrafficMonitor.exe artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: TrafficMonitor-speedtest-x64
+        path: |
+          Bin/x64/Release/TrafficMonitor.exe
+          Bin/x64/Release/*.dll
+          Bin/x64/Release/*.xml
+        if-no-files-found: error

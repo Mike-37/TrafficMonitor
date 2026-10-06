@@ -306,7 +306,7 @@ struct TaskBarSettingData : public PublicSettingData
     void SetTaskabrTransparent(bool transparent);
 
     CTaskbarItemOrderHelper item_order;
-    DisplayItemSet display_item{ TDI_UP, TDI_DOWN };      //任务栏窗口显示的项目
+    DisplayItemSet display_item{ TDI_UP, TDI_DOWN, TDI_TOTAL_SPEED, TDI_TODAY_TRAFFIC };      //任务栏窗口显示的项目（speed-test 端口：四项）
     StringSet plugin_display_item;                  //任务窗口显示的插件项目
 
     bool show_taskbar_wnd_in_secondary_display{ false };    //是否在副显示器上显示任务栏窗口

@@ -206,6 +206,11 @@ void CTaskBarDlg::ShowInfo(CDC* pDC)
 
 void CTaskBarDlg::DrawDisplayItem(IDrawCommon& drawer, DisplayItem type, CRect rect, int label_width, bool vertical)
 {
+    //speed-test 项：值文本自包含标签（如 "↓19.4 ↑7.5Mb"），不绘制默认标签，也不绘制实时网速占用图
+    const bool is_speedtest_item = IsSpeedtestDisplayItem(type);
+    if (is_speedtest_item)
+        label_width = 0;
+
     //设置要绘制的文本颜色
     COLORREF label_color{};
     COLORREF text_color{};
@@ -234,10 +239,10 @@ void CTaskBarDlg::DrawDisplayItem(IDrawCommon& drawer, DisplayItem type, CRect r
         rect_value.top = rect_label.bottom;
     }
 
-    // 绘制状态条
-    if (type == TDI_CPU || type == TDI_MEMORY || type == TDI_GPU_USAGE || type == TDI_CPU_TEMP
+    // 绘制状态条（speed-test 项不绘制实时网速占用图）
+    if (!is_speedtest_item && (type == TDI_CPU || type == TDI_MEMORY || type == TDI_GPU_USAGE || type == TDI_CPU_TEMP
         || type == TDI_GPU_TEMP || type == TDI_HDD_TEMP || type == TDI_MAIN_BOARD_TEMP || type == TDI_HDD_USAGE
-        || type == TDI_UP || type == TDI_DOWN || type == TDI_TOTAL_SPEED/* ||type==TDI_CPU_FREQ*/)
+        || type == TDI_UP || type == TDI_DOWN || type == TDI_TOTAL_SPEED/* ||type==TDI_CPU_FREQ*/))
     {
         int figure_value{};
         switch (type)
@@ -783,8 +788,11 @@ void CTaskBarDlg::CalculateWindowSize()
         }
         else
         {
-            //标签宽度
-            item_widths[*iter].label_width = m_pDC->GetTextExtent(theApp.m_taskbar_data.disp_str.GetConst(*iter).c_str()).cx;
+            //标签宽度（speed-test 项不显示默认标签）
+            if (IsSpeedtestDisplayItem(iter->ItemType()))
+                item_widths[*iter].label_width = 0;
+            else
+                item_widths[*iter].label_width = m_pDC->GetTextExtent(theApp.m_taskbar_data.disp_str.GetConst(*iter).c_str()).cx;
             //数值宽度
             CString sample_str = iter->GetItemValueSampleText(false);
             item_widths[*iter].value_width = m_pDC->GetTextExtent(sample_str).cx;

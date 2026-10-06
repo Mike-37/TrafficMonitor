@@ -81,6 +81,9 @@ private:
     IPluginItem* plugin_item{}; //插件显示项目
 };
 
+//是否为任务栏上被 speed-test 数据替换的显示项目（值文本自包含标签，不再绘制默认标签，也不绘制网速占用图）
+bool IsSpeedtestDisplayItem(DisplayItem item);
+
 
 class DisplayItemSet
 {

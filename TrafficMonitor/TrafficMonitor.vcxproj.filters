@@ -544,6 +544,9 @@
     <ClInclude Include="DisplayItem.h">
       <Filter>源文件和头文件\公共的类\DisplayItem</Filter>
     </ClInclude>
+    <ClInclude Include="SpeedTestDisplay.h">
+      <Filter>源文件和头文件\公共的类\DisplayItem</Filter>
+    </ClInclude>
     <ClInclude Include="WineTaskbarDlg.h">
       <Filter>源文件和头文件\TaskBarDlg</Filter>
     </ClInclude>
@@ -823,6 +826,9 @@
       <Filter>源文件和头文件\公共的类\PluginUpdateHelper</Filter>
     </ClCompile>
     <ClCompile Include="DisplayItem.cpp">
+      <Filter>源文件和头文件\公共的类\DisplayItem</Filter>
+    </ClCompile>
+    <ClCompile Include="SpeedTestDisplay.cpp">
       <Filter>源文件和头文件\公共的类\DisplayItem</Filter>
     </ClCompile>
     <ClCompile Include="WineTaskbarDlg.cpp">

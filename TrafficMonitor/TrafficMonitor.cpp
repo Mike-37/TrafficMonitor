@@ -244,6 +244,12 @@ void CTrafficMonitorApp::LoadConfig()
     m_taskbar_data.ValidItemSpace();
     m_taskbar_data.ValidWindowOffsetTop();
     m_taskbar_data.ValidWindowOffsetLeft();
+    // speed-test 端口：任务栏面板默认左移，居中于应用图标区与系统托盘之间的空档
+    // （本机实测：图标区右缘≈677、托盘左缘≈1044 逻辑px，空档≈368px，面板宽≈247px；
+    //   offset -61（96dpi单位）→ 物理左移≈73px，两侧各留≈60px，距托盘≥40px）。
+    // config 的 window_offset_left 若被旧进程退出时覆盖为 0，此处兜底仍生效。
+    if (m_taskbar_data.window_offset_left == 0)
+        m_taskbar_data.window_offset_left = -61;
     m_taskbar_data.avoid_overlap_with_widgets = ini.GetBool(_T("task_bar"), _T("avoid_overlap_with_widgets"), false);
     m_taskbar_data.taskbar_left_space_win11 = ini.GetInt(L"task_bar", L"taskbar_left_space_win11", 160);
     m_taskbar_data.taskbar_right_space_win11 = ini.GetInt(L"task_bar", L"taskbar_right_space_win11", 280);
@@ -262,6 +268,17 @@ void CTrafficMonitorApp::LoadConfig()
 
     m_taskbar_data.item_order.Init();
     m_taskbar_data.item_order.FromString(ini.GetString(L"task_bar", L"item_order", L""));
+    // speed-test 端口：强制任务栏项目顺序。两行（非水平）渲染按相邻两项组成一列：
+    // 列1=(结果,ping) 列2=(CPU,jitter) 列3=(HDD,@时间) 列4=MEM(独占整高)，
+    // 视觉上 line1 = ↓11.7↑14.9Mb / CPU / HDD，line2 = 71ms / ±11ms / @19:19 —— 时间紧邻 ms 值。
+    // 索引 = AllDisplayItemsWithPlugins 默认顺序（Release x64 含温度项共13个 0..12；lite 无温度项 0..8）。
+#ifdef WITHOUT_TEMPERATURE
+    // 0=UP 1=DOWN 2=CPU 3=MEM 4=GPU 5=HDD 6=CPU_FREQ 7=TOTAL_SPEED(jitter) 8=TODAY_TRAFFIC(@)
+    m_taskbar_data.item_order.SetOrder({ 0, 1, 2, 7, 5, 8, 3 });
+#else
+    // 0=UP 1=DOWN 2=CPU 3=MEM 4=GPU 5..8=温度 9=HDD 10=TOTAL_SPEED(jitter) 11=CPU_FREQ 12=TODAY_TRAFFIC(@)
+    m_taskbar_data.item_order.SetOrder({ 0, 1, 2, 10, 9, 12, 3 });
+#endif
     m_taskbar_data.plugin_display_item.FromString(ini.GetString(L"task_bar", L"plugin_display_item", L""));
     m_taskbar_data.auto_save_taskbar_color_settings_to_preset = ini.GetBool(L"task_bar", L"auto_save_taskbar_color_settings_to_preset", true);
 
